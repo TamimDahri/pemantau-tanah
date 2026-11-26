@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_state.dart';
 import '../models.dart';
 import '../theme.dart';
+import 'cases_screen.dart';
 import 'lot_visit_screen.dart';
 import 'review_submit_screen.dart';
 
@@ -32,6 +33,9 @@ class LotDetailScreen extends StatelessWidget {
                 children: [
                   Pill(lot.status.label,
                       fg: lot.status.dark, bg: lot.status.soft),
+                  Pill(lot.risk.label, fg: lot.risk.fg, bg: lot.risk.bg),
+                  Pill('${lot.agency.label} · ${lot.agency.landLabel}',
+                      fg: AppColors.text, bg: AppColors.greySoft),
                   if (lot.verifiedOnSite)
                     const Pill('Disahkan di tapak',
                         fg: AppColors.greenDark, bg: AppColors.greenSoft),
@@ -52,7 +56,9 @@ class LotDetailScreen extends StatelessWidget {
                         'Keluasan', '${lot.areaHa.toStringAsFixed(2)} ha'),
                     InfoRow('Jenis tanah', lot.landType),
                     InfoRow('Sumber sempadan', lot.boundarySource),
-                    InfoRow('Pegawai kawasan', lot.officer),
+                    InfoRow('Agensi penjaga', lot.agency.label),
+                    InfoRow('Pemantauan', lot.risk.frequency),
+                    InfoRow('Pegawai bertugas', lot.officer),
                     InfoRow('Penyelia', lot.supervisor),
                   ],
                 ),
@@ -105,6 +111,28 @@ class LotDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              if (appState.casesFor(lot).isNotEmpty) ...[
+                const SizedBox(height: 10),
+                SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Kes pencerobohan',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                      for (final c in appState.casesFor(lot))
+                        InkWell(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => CaseDetailScreen(caseItem: c)),
+                          ),
+                          child: InfoRow(c.id, c.stage.label,
+                              valueColor: c.stage.fg),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 10),
               const Text(boundaryNote,
                   style: TextStyle(fontSize: 12, color: AppColors.muted)),

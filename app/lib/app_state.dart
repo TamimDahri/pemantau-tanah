@@ -84,6 +84,7 @@ class AppState extends ChangeNotifier {
   List<Lot> lots = [];
   List<WorkItem> work = [];
   List<AlertItem> alerts = [];
+  List<EncroachmentCase> cases = [];
 
   LocationFix? _deviceFix;
 
@@ -109,6 +110,7 @@ class AppState extends ChangeNotifier {
     lots = data.lots;
     work = data.work;
     alerts = data.alerts;
+    cases = data.cases;
     ready = true;
     notifyListeners();
     if (usingRealLocation) {
@@ -238,6 +240,11 @@ class AppState extends ChangeNotifier {
     alert.state = decision;
     alert.decidedAt = DateTime.now();
     final lot = lotById(alert.lotId);
+    if (decision == AlertState.acknowledged) {
+      openCase(alert);
+      // A confirmed encroachment moves the lot to monthly visits.
+      lot.risk = RiskLevel.high;
+    }
     final stillOpen =
         alerts.any((a) => a.lotId == lot.id && a.state == AlertState.open);
     if (!stillOpen && lot.status == LotStatus.alert) {
@@ -246,6 +253,90 @@ class AppState extends ChangeNotifier {
     for (final w in work) {
       if (w.lotId == lot.id && w.status == WorkStatus.alertSent && !stillOpen) {
         w.status = WorkStatus.done;
+      }
+    }
+    notifyListeners();
+  }
+
+  EncroachmentCase? caseForAlert(AlertItem alert) {
+    for (final c in cases) {
+      if (c.id == 'K-${alert.id}') return c;
+    }
+    return null;
+  }
+
+  List<EncroachmentCase> casesFor(Lot lot) =>
+      cases.where((c) => c.lotId == lot.id).toList();
+
+  int get openCaseCount =>
+      cases.where((c) => c.stage != CaseStage.closed).length;
+
+  /// Open cases first, oldest first; closed cases last.
+  List<EncroachmentCase> get sortedCases {
+    final now = DateTime.now();
+    return [...cases]..sort((a, b) {
+        final ca = a.stage == CaseStage.closed ? 1 : 0;
+        final cb = b.stage == CaseStage.closed ? 1 : 0;
+        if (ca != cb) return ca.compareTo(cb);
+        return b.ageDays(now).compareTo(a.ageDays(now));
+      });
+  }
+
+  /// An acknowledged alert becomes a case that is tracked until closed.
+  EncroachmentCase openCase(AlertItem alert) {
+    final existing = caseForAlert(alert);
+    if (existing != null) return existing;
+    final now = DateTime.now();
+    final summary = [
+      alert.categories.join(', '),
+      if (alert.note.isNotEmpty) alert.note,
+    ].join('. ');
+    final c = EncroachmentCase(
+      id: 'K-${alert.id}',
+      lotId: alert.lotId,
+      openedAt: alert.createdAt,
+      summary: summary,
+      events: [
+        CaseEvent(alert.createdAt, alert.reportedBy, 'Laporan perubahan',
+            '${alert.source}. ${alert.photos.length} gambar berlokasi.'),
+        CaseEvent(now, demoSupervisor, 'Pencerobohan disahkan',
+            'Gambar dibandingkan dengan gambar asas.'),
+      ],
+    );
+    cases.insert(0, c);
+    return c;
+  }
+
+  /// Moves a case one step forward and records who did it and when.
+  void advanceCase(EncroachmentCase c, {String note = '', String? pdtRef}) {
+    final now = DateTime.now();
+    final next = switch (c.stage) {
+      CaseStage.confirmed => CaseStage.packReady,
+      CaseStage.packReady => CaseStage.complaintFiled,
+      CaseStage.complaintFiled => CaseStage.pdtAction,
+      CaseStage.pdtAction => CaseStage.followUp,
+      CaseStage.followUp => CaseStage.closed,
+      CaseStage.closed => CaseStage.closed,
+    };
+    if (next == c.stage) return;
+    final title = switch (next) {
+      CaseStage.packReady => 'Pek aduan dijana',
+      CaseStage.complaintFiled => 'Aduan dihantar ke PDT',
+      CaseStage.pdtAction => 'Tindakan PDT direkod',
+      CaseStage.followUp => 'Lawatan susulan dijadualkan',
+      CaseStage.closed => 'Tapak disahkan bersih, kes ditutup',
+      CaseStage.confirmed => '',
+    };
+    if (pdtRef != null && pdtRef.isNotEmpty) c.pdtRef = pdtRef;
+    c.stage = next;
+    c.events.add(CaseEvent(now, demoSupervisor, title, note));
+    if (next == CaseStage.closed) {
+      c.closedAt = now;
+      final lot = lotById(c.lotId);
+      final stillOpen = cases.any(
+          (o) => o.lotId == lot.id && o.stage != CaseStage.closed);
+      if (!stillOpen && lot.status == LotStatus.alert) {
+        lot.status = LotStatus.current;
       }
     }
     notifyListeners();

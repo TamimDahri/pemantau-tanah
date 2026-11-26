@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_state.dart';
 import 'models.dart';
 import 'screens/alerts_screen.dart';
+import 'screens/cases_screen.dart';
 import 'screens/district_map_screen.dart';
 import 'screens/my_work_screen.dart';
 import 'theme.dart';
@@ -80,6 +81,7 @@ class _RootShellState extends State<RootShell> {
                       DistrictMapScreen(),
                       MyWorkScreen(),
                       AlertsScreen(),
+                      CasesScreen(),
                     ],
                   ),
                 ),
@@ -107,6 +109,14 @@ class _RootShellState extends State<RootShell> {
                 ),
                 label: 'Amaran',
               ),
+              NavigationDestination(
+                icon: Badge(
+                  isLabelVisible: appState.openCaseCount > 0,
+                  label: Text('${appState.openCaseCount}'),
+                  child: const Icon(Icons.gavel_outlined),
+                ),
+                label: 'Kes',
+              ),
             ],
           ),
         );
@@ -130,7 +140,7 @@ class _DemoBar extends StatelessWidget {
         children: [
           const Expanded(
             child: Text(
-              'DEMO · data contoh, tiada pangkalan data',
+              'DEMO v0.2 · data contoh, tiada pangkalan data',
               style: TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),

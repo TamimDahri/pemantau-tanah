@@ -226,3 +226,77 @@ String formatTime(DateTime d) {
   final m = d.minute.toString().padLeft(2, '0');
   return '$h:$m ${d.hour < 12 ? 'pg' : 'ptg'}';
 }
+
+extension AgencyUi on Agency {
+  String get label => switch (this) {
+        Agency.pws => 'PWS',
+        Agency.jais => 'JAIS',
+        Agency.mais => 'MAIS',
+      };
+
+  String get landLabel => switch (this) {
+        Agency.pws => 'Tanah wakaf',
+        Agency.jais => 'Tanah warta s.62',
+        Agency.mais => 'Wakaf irsod',
+      };
+}
+
+extension RiskLevelUi on RiskLevel {
+  String get label => switch (this) {
+        RiskLevel.high => 'Risiko tinggi',
+        RiskLevel.medium => 'Risiko sederhana',
+        RiskLevel.low => 'Risiko rendah',
+      };
+
+  /// Proposed visit interval; agencies set the real one in their SOP.
+  String get frequency => switch (this) {
+        RiskLevel.high => 'Lawatan bulanan',
+        RiskLevel.medium => 'Lawatan setiap 3 bulan',
+        RiskLevel.low => 'Semakan imej udara setahun sekali',
+      };
+
+  Color get fg => switch (this) {
+        RiskLevel.high => AppColors.criticalDark,
+        RiskLevel.medium => AppColors.amberDark,
+        RiskLevel.low => AppColors.greenDark,
+      };
+
+  Color get bg => switch (this) {
+        RiskLevel.high => AppColors.criticalSoft,
+        RiskLevel.medium => AppColors.amberSoft,
+        RiskLevel.low => AppColors.greenSoft,
+      };
+}
+
+extension CaseStageUi on CaseStage {
+  String get label => switch (this) {
+        CaseStage.confirmed => 'Pencerobohan disahkan',
+        CaseStage.packReady => 'Pek aduan disediakan',
+        CaseStage.complaintFiled => 'Aduan di PDT',
+        CaseStage.pdtAction => 'Tindakan PDT',
+        CaseStage.followUp => 'Lawatan susulan',
+        CaseStage.closed => 'Ditutup',
+      };
+
+  /// Label of the button that moves the case to the next stage.
+  String? get nextAction => switch (this) {
+        CaseStage.confirmed => 'Jana pek aduan PDT',
+        CaseStage.packReady => 'Tanda aduan dihantar ke PDT',
+        CaseStage.complaintFiled => 'Rekod tindakan PDT',
+        CaseStage.pdtAction => 'Jadualkan lawatan susulan',
+        CaseStage.followUp => 'Sahkan tapak bersih dan tutup kes',
+        CaseStage.closed => null,
+      };
+
+  Color get fg => this == CaseStage.closed
+      ? AppColors.greenDark
+      : (this == CaseStage.confirmed || this == CaseStage.packReady)
+          ? AppColors.amberDark
+          : const Color(0xFF1D4E89);
+
+  Color get bg => this == CaseStage.closed
+      ? AppColors.greenSoft
+      : (this == CaseStage.confirmed || this == CaseStage.packReady)
+          ? AppColors.amberSoft
+          : const Color(0xFFDDE8F5);
+}

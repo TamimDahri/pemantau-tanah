@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import '../app_state.dart';
 import '../models.dart';
 import '../theme.dart';
+import 'cases_screen.dart';
 import 'review_submit_screen.dart';
 
 extension AlertStateUi on AlertState {
   String get label => switch (this) {
         AlertState.open => 'Belum diakui',
-        AlertState.acknowledged => 'Diakui',
+        AlertState.acknowledged => 'Diakui, kes dibuka',
         AlertState.falseAlarm => 'Amaran palsu',
       };
 
@@ -181,25 +182,37 @@ class AlertDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                'Jika tidak diakui dalam [TEMPOH DITETAPKAN JAIS], amaran ini '
-                'dinaikkan ke peringkat atas. Siasatan dan tindakan seterusnya '
-                'mengikut SOP JAIS, di luar aplikasi.',
+                'Jika tidak diakui dalam tempoh yang ditetapkan agensi, amaran '
+                'ini dinaikkan ke peringkat atas. Amaran yang diakui menjadi kes '
+                'pencerobohan dan dijejak sehingga ditutup.',
                 style: TextStyle(fontSize: 12, color: AppColors.muted),
               ),
               const SizedBox(height: 16),
-              if (alert.state != AlertState.open)
+              if (alert.state != AlertState.open) ...[
                 Banner2(
                   icon: Icons.check_circle_outline,
                   fg: alert.state.fg,
                   bg: alert.state.bg,
                   text: '${alert.state.label} pada '
                       '${formatDate(alert.decidedAt!)}, ${formatTime(alert.decidedAt!)}.',
-                )
-              else if (isSupervisor) ...[
+                ),
+                if (appState.caseForAlert(alert) != null) ...[
+                  const SizedBox(height: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CaseDetailScreen(
+                            caseItem: appState.caseForAlert(alert)!),
+                      ),
+                    ),
+                    child: const Text('Lihat kes'),
+                  ),
+                ],
+              ] else if (isSupervisor) ...[
                 FilledButton(
                   onPressed: () =>
                       appState.decideAlert(alert, AlertState.acknowledged),
-                  child: const Text('Akui dan buka siasatan'),
+                  child: const Text('Sahkan pencerobohan dan buka kes'),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(

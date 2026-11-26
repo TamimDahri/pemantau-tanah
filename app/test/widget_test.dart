@@ -88,6 +88,37 @@ void main() {
       expect(lot.status, LotStatus.current);
     });
 
+    test('an acknowledged alert opens a case that is tracked to closure',
+        () async {
+      final state = AppState();
+      await state.init(source: FakeLocation(null), loadTiles: false);
+      final lot = state.lotById('lot-01');
+      state.submitReport(lot, noChange: false, categories: ['Pondok']);
+      final alert = state.alerts.first;
+      final before = state.cases.length;
+      state.decideAlert(alert, AlertState.acknowledged);
+      expect(state.cases.length, before + 1);
+      final c = state.caseForAlert(alert)!;
+      expect(c.stage, CaseStage.confirmed);
+      expect(lot.risk, RiskLevel.high);
+      for (var i = 0; i < 5; i++) {
+        state.advanceCase(c);
+      }
+      expect(c.stage, CaseStage.closed);
+      expect(c.closedAt, isNotNull);
+      expect(c.events.length, 7);
+    });
+
+    test('a false alarm opens no case', () async {
+      final state = AppState();
+      await state.init(source: FakeLocation(null), loadTiles: false);
+      final lot = state.lotById('lot-01');
+      state.submitReport(lot, noChange: false, categories: ['Pagar']);
+      final before = state.cases.length;
+      state.decideAlert(state.alerts.first, AlertState.falseAlarm);
+      expect(state.cases.length, before);
+    });
+
     test('no change completes the work without an alert', () async {
       final state = AppState();
       await state.init(source: FakeLocation(null), loadTiles: false);
@@ -112,5 +143,10 @@ void main() {
     await tester.pump();
     expect(find.text('Kerja saya'), findsOneWidget);
     expect(find.textContaining('Peringatan:'), findsOneWidget);
+
+    await tester.tap(find.text('Kes'));
+    await tester.pump();
+    expect(find.text('Kes pencerobohan'), findsOneWidget);
+    expect(find.textContaining('K-2026-031'), findsOneWidget);
   });
 }

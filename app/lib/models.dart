@@ -8,6 +8,49 @@ enum WorkStatus { todo, alertSent, done }
 
 enum AlertState { open, acknowledged, falseAlarm }
 
+/// Agency that looks after the lot.
+enum Agency { pws, jais, mais }
+
+/// Monitoring tier. Sets how often the lot is visited.
+enum RiskLevel { high, medium, low }
+
+/// Steps of an encroachment case, from confirmation to closure.
+enum CaseStage { confirmed, packReady, complaintFiled, pdtAction, followUp, closed }
+
+class CaseEvent {
+  const CaseEvent(this.at, this.actor, this.title, [this.note = '']);
+
+  final DateTime at;
+  final String actor;
+  final String title;
+  final String note;
+}
+
+class EncroachmentCase {
+  EncroachmentCase({
+    required this.id,
+    required this.lotId,
+    required this.openedAt,
+    required this.summary,
+    required this.events,
+    this.stage = CaseStage.confirmed,
+    this.pdtRef,
+    this.closedAt,
+  });
+
+  final String id;
+  final String lotId;
+  final DateTime openedAt;
+  final String summary;
+  final List<CaseEvent> events;
+  CaseStage stage;
+  String? pdtRef;
+  DateTime? closedAt;
+
+  int ageDays(DateTime now) =>
+      (closedAt ?? now).difference(openedAt).inDays;
+}
+
 class BoundaryStone {
   const BoundaryStone(this.label, this.point);
 
@@ -39,6 +82,8 @@ class Lot {
     required this.status,
     required this.verifiedOnSite,
     this.bufferM = 15,
+    this.agency = Agency.pws,
+    this.risk = RiskLevel.medium,
     this.lastVisit,
     this.lastVisitResult,
   });
@@ -58,7 +103,9 @@ class Lot {
   final List<BoundaryStone> stones;
   final List<PhotoPost> posts;
   final double bufferM;
+  final Agency agency;
 
+  RiskLevel risk;
   LotStatus status;
   bool verifiedOnSite;
   DateTime? lastVisit;
