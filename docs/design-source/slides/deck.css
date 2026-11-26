@@ -1,0 +1,38 @@
+section{padding:128px;background:#F5F6F3;color:#14231C;font-family:Inter,sans-serif;display:flex;flex-direction:column}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0}
+h1{font-size:112px;line-height:1.05;font-weight:700;max-width:1100px}
+h2{font-size:64px;line-height:1.1;font-weight:700}
+h3{font-size:36px;line-height:1.15;font-weight:700}
+.dark{background:#14231C;color:#F2F4EF}
+.accent{background:#1F6B4A;color:#F5F6F3}
+.kicker{font-size:28px;font-weight:600;color:#1F6B4A;margin:0 0 16px}
+.dark .kicker{color:#8FD3B0}
+.accent .kicker{color:#D9EEE3}
+.lead{font-size:36px;line-height:1.35;margin:28px 0 0;max-width:1100px}
+.note{font-size:24px;line-height:1.4;color:#55615B;margin:0}
+.dark .note{color:#B9C4BC}
+.spacer{flex:1}
+.row{display:flex;gap:32px;margin-top:56px;align-items:stretch}
+.tight{gap:20px;margin-top:40px}
+.card{flex:1;background:#FFFFFF;border:2px solid #DDE2DC;border-radius:24px;padding:36px;display:flex;flex-direction:column;gap:18px}
+.step{padding:28px}
+.card .txt{font-size:26px;line-height:1.35;margin:0;color:#3C4742}
+.card .num{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;color:#B45309;margin:0}
+.card .big{font-family:'Space Grotesk',sans-serif;font-size:96px;font-weight:700;line-height:1;margin:0;color:#1F6B4A}
+.col{flex:1;display:flex;flex-direction:column;gap:28px}
+.left{flex:2}
+.state{font-size:60px;line-height:1.1}
+.stack{display:flex;flex-direction:column;gap:14px;margin-top:44px}
+.band{display:flex;align-items:center;gap:28px;background:#FFFFFF;border:2px solid #DDE2DC;border-radius:20px;padding:18px 32px}
+.band .lab{font-size:24px;color:#55615B;margin:0;width:280px}
+.band h3{font-size:34px;width:620px}
+.band .txt{font-size:26px;margin:0;color:#3C4742}
+.core{background:#D9EEE3;border-color:#1F6B4A}
+.out{background:#F5F6F3;border-style:dashed;border-color:#8A948D}
+.phase{flex:1;background:#D9EEE3;border-radius:16px;padding:22px 24px}
+.phase .txt{font-size:26px;font-weight:600;margin:0;color:#17543A}
+.list{font-size:36px;line-height:1.3;margin:48px 0 0;padding-left:48px;display:flex;flex-direction:column;gap:22px}
+.hero{position:absolute;right:128px;bottom:128px}
+.shots{display:flex;gap:32px;flex:none}
+.shot{display:flex;flex-direction:column;align-items:center;gap:14px}
+.shot img{width:250px;height:540px;object-fit:contain;border:6px solid #14231C;border-radius:30px;background:#F5F6F3}

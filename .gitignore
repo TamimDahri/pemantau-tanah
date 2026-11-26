@@ -1,0 +1,8 @@
+apk/
+app/build/
+app/.dart_tool/
+app/.flutter-plugins*
+app/android/.gradle/
+app/android/local.properties
+*.iml
+.idea/
